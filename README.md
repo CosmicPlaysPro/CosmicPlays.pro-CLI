@@ -1,3 +1,3 @@
 # CosmicPlays.pro-CLI
  
-Source code of CosmicPlays.pro CLI based on OBS.Studio
+Source code of CosmicPlays.pro-CLI video recorder based on OBS.Studio
