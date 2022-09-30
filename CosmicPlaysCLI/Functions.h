@@ -17,7 +17,7 @@ void PrintHelp() {
 	cout << "Usage: CosmicPlaysCLI.exe <parameters>" << endl << endl;
 	cout << "Available parameters:" << endl;
 	cout << "--fps      <30/60> Change FPS of recorded video (default: 30)" << endl;
-	cout << "--output   <1280x768/1920x1080/fullRes> Change FPS of recorded video (default: fullRes)" << endl;
+	cout << "--output   <852x480/1280x720/1920x1080/fullRes> Change FPS of recorded video (default: fullRes)" << endl;
 	cout << "--bitrate  <2500/9000/24000> Change video Bitrate (default: 2500)" << endl;
 	cout << "--path     <D:\\Recordings> Change recording location (default: C:\\Users\\<user>\\Videos)" << endl;
 	cout << "--fileName <default/filename[.mp4/.mkv]> Change recording file name (default: rec-<datetime>.mp4)" << endl;
@@ -204,8 +204,10 @@ bool CheckInput(InputParser input, Options &opt) {
 			}
 			outX = ParseInt(outRegex[1]);
 			outY = ParseInt(outRegex[2]);
-			if (outX < 768 || outY < 768)
+			if (outX < 480 || outY < 480) {
+				cout << "[Error] Resolution must be higher or equal to 480" << endl;
 				return false;
+			}
 			opt.outputX = outX;
 			opt.outputY = outY;
 		}
