@@ -6,6 +6,33 @@
 #include <time.h>
 #include <string>
 
+struct sEnumInfo {
+	int iIndex = 0;
+	HMONITOR hMonitor = NULL;
+};
+
+BOOL CALLBACK GetMonitorByHandle(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	auto info = (sEnumInfo*)dwData;
+	if (info->hMonitor == hMonitor) return FALSE;
+	++info->iIndex;
+	return TRUE;
+}
+
+HMONITOR GetPrimaryMonitor()
+{
+	return MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+}
+
+int GetPrimaryMonitorIndex()
+{
+	sEnumInfo info;
+	info.hMonitor = GetPrimaryMonitor();
+
+	if (EnumDisplayMonitors(NULL, NULL, GetMonitorByHandle, (LPARAM)&info)) return -1;
+	return info.iIndex;
+}
+
 StreamMgr::StreamMgr(Options &_opt)
 {
 	opt = _opt;
@@ -185,25 +212,47 @@ void StreamMgr::CreateDefaultScene()
 	obs_leave_graphics();
 
 	OBSData settings = obs_data_create();
-	obs_data_release(settings);
 	//obs_data_set_string(settings, "window", "League of Legends (TM) Client:RiotWindowClass:League of Legends.exe");
 	//obs_data_set_string(settings, "capture_mode", "window");
 	//obs_data_set_bool(settings, "capture_any_fullscreen", true);
 	//obs_data_set_bool(settings, "capture_cursor", false);
-	obs_source_t* source2 = obs_source_create("game_capture", "Game Capture", settings, nullptr);
+
+	//obs_source_t* source2 = obs_source_create("game_capture", "Game Capture", settings, nullptr);
+	obs_source_t* source2;
+	const char* sceneName;
+	int monitorIndex = 0;
+
+	switch(opt.captureMethod) {
+		case 1:
+			sceneName = "Game Capture";
+			source2 = obs_source_create("game_capture", sceneName, settings, nullptr);
+			break;
+		case 2:
+			sceneName = "Monitor Capture";
+			monitorIndex = GetPrimaryMonitorIndex();
+			obs_data_set_int(settings, "monitor", monitorIndex);
+			cout << "Monitor display index: " << monitorIndex << endl;
+			source2 = obs_source_create("monitor_capture", sceneName, settings, nullptr);
+			break;
+		default:
+			cout << "Invalid capture method specified, exiting..." << endl;
+			exit(500);
+	}
+	obs_data_release(settings);
+
 	//AddSourceData data;
 	data.source = source2;
 	data.visible = true;
 	obs_enter_graphics();
 	obs_scene_atomic_update(curScene, AddSource, &data);
-	obs_sceneitem_t* sceneItem = obs_scene_find_source(curScene, "Game Capture");
+	obs_sceneitem_t* sceneItem = obs_scene_find_source(curScene, sceneName);
+	if (sceneItem)
+		obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_STRETCH);
 	obs_leave_graphics();
 	obs_source_release(source2);
 	obs_source_release(source3);
 	obs_set_output_source(3, source2);
 	obs_set_output_source(2, source3);
-	if (sceneItem)
-		obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_STRETCH);
 }
 
 static void SaveAudioDevice(const char* name, int channel, obs_data_t* parent,
@@ -560,7 +609,7 @@ bool StreamMgr::StartRecording()
 			streamOutput = obs_output_create("ffmpeg_output", "File output", settings, nullptr);
 			break;
 		default:
-			cout << "No mode flag specified, exiting..." << endl;
+			cout << "Invalid mode flag specified, exiting..." << endl;
 			exit(500);
 	}
 	obs_output_release(streamOutput);

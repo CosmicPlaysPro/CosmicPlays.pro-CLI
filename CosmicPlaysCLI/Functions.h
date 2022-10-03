@@ -23,6 +23,7 @@ void PrintHelp() {
 	cout << "--fileName <default/filename[.mp4/.mkv]> Change recording file name (default: rec-<datetime>.mp4)" << endl;
 	cout << "--mode <1/2> Change recording mode: 1 - ffmuxer, 2 - ffmpeg (default: 1)" << endl;
 	cout << "--muxerFlags <flags> Change ffmuxer flags (default: movflags=frag_keyframe min_frag_duration=4000000)" << endl;
+	cout << "--captureMethod <1/2> Change capture method: 1 - game capture, 2 - display capture (default: 1) " << endl;
 	cout << endl;
 }
 
@@ -105,7 +106,7 @@ char* GetFFMuxerFlags(string muxerFlags) {
 }
 
 bool CheckInput(InputParser input, Options &opt) {
-	int iFPS, iMode, iBitrate, outX, outY, pUserErr;
+	int iFPS, iMode, iMethod, iBitrate, outX, outY, pUserErr;
 	char path[256];
 	char* pUser;
 	BOOL fScreenX, fScreenY;
@@ -148,6 +149,16 @@ bool CheckInput(InputParser input, Options &opt) {
 		if (iMode != 1 && iMode!= 2)
 			return false;
 		opt.mode = iMode;
+	}
+
+	if (input.cmdOptionExists("--captureMethod")) {
+		string method = input.getCmdOption("--captureMethod");
+		if (method.empty())
+			return false;
+		iMethod = ParseInt(method);
+		if (iMethod != 1 && iMethod!= 2)
+			return false;
+		opt.captureMethod = iMethod;
 	}
 
 	if (input.cmdOptionExists("--bitrate")) {
@@ -240,6 +251,7 @@ void PrintOptions(Options &opt) {
 	cout << "------------------------" << endl;
 	cout << "- FPS: " << opt.fps << endl;
 	cout << "- Mode: " << opt.mode << endl;
+	cout << "- Capture method: " << opt.captureMethod << endl;
 	cout << "- Video bitrate: " << opt.bitrate << endl;
 	cout << "- Audio bitrate: " << opt.audioBitrate << endl;
 	cout << "- Screen res: " << opt.screenX << "x" << opt.screenY << endl;

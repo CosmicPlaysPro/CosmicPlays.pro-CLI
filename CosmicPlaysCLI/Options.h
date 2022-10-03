@@ -12,9 +12,10 @@ public:
 	int outputX = 1920;
 	int outputY = 1080;
 	int mode = 1;
+	int captureMethod = 1;
+	char* muxerFlags;
+	char* filePath;
 	string output = "fullRes";
 	string path = "default";
 	string fileName = "default";
-	char* muxerFlags;
-	char* filePath;
 };
