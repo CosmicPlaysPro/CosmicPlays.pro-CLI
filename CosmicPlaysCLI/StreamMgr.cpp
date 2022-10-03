@@ -1,37 +1,9 @@
 #include "StreamMgr.h"
 #include "include/util/util.hpp"
 #include "include/util/platform.h"
-#include <windows.h>
 #include <stdio.h>
 #include <time.h>
 #include <string>
-
-struct sEnumInfo {
-	int iIndex = 0;
-	HMONITOR hMonitor = NULL;
-};
-
-BOOL CALLBACK GetMonitorByHandle(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
-{
-	auto info = (sEnumInfo*)dwData;
-	if (info->hMonitor == hMonitor) return FALSE;
-	++info->iIndex;
-	return TRUE;
-}
-
-HMONITOR GetPrimaryMonitor()
-{
-	return MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
-}
-
-int GetPrimaryMonitorIndex()
-{
-	sEnumInfo info;
-	info.hMonitor = GetPrimaryMonitor();
-
-	if (EnumDisplayMonitors(NULL, NULL, GetMonitorByHandle, (LPARAM)&info)) return -1;
-	return info.iIndex;
-}
 
 StreamMgr::StreamMgr(Options &_opt)
 {
@@ -637,4 +609,26 @@ void StreamMgr::StopRecording()
 		obs_output_force_stop(streamOutput);
 	}
 	ShutDown();
+}
+
+BOOL CALLBACK GetMonitorByHandle(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	auto info = (sEnumInfo*)dwData;
+	if (info->hMonitor == hMonitor) return FALSE;
+	++info->iIndex;
+	return TRUE;
+}
+
+HMONITOR StreamMgr::GetPrimaryMonitor()
+{
+	return MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+}
+
+int StreamMgr::GetPrimaryMonitorIndex()
+{
+	sEnumInfo info;
+	info.hMonitor = GetPrimaryMonitor();
+
+	if (EnumDisplayMonitors(NULL, NULL, GetMonitorByHandle, (LPARAM)&info)) return -1;
+	return info.iIndex;
 }

@@ -166,7 +166,7 @@ bool CheckInput(InputParser input, Options &opt) {
 		if (bitrate.empty())
 			return false;
 		iBitrate = ParseInt(bitrate);
-		if (iBitrate < 2500 || iBitrate > 24000)
+		if (iBitrate < 2500 || iBitrate > 32000)
 			return false;
 		opt.bitrate = iBitrate;
 	}

@@ -3,6 +3,7 @@
 #include "include/obs.hpp"
 #include <vector>
 #include <iostream>
+#include <windows.h>
 
 #define DESKTOP_AUDIO_1 "DesktopAudioDevice1"
 #define DESKTOP_AUDIO_2 "DesktopAudioDevice2"
@@ -10,6 +11,11 @@
 #define AUX_AUDIO_2 "AuxAudioDevice2"
 #define AUX_AUDIO_3 "AuxAudioDevice3"
 #define AUX_AUDIO_4 "AuxAudioDevice4"
+
+struct sEnumInfo {
+	int iIndex = 0;
+	HMONITOR hMonitor = NULL;
+};
 
 class StreamMgr
 {
@@ -53,4 +59,7 @@ public:
 
 	static void SourceCreated(void *data, calldata_t *params);
 	static void ShutDown();
+
+	HMONITOR GetPrimaryMonitor();
+	int GetPrimaryMonitorIndex();
 };
