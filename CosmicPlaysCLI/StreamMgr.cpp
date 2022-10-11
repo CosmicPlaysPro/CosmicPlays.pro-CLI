@@ -551,6 +551,7 @@ bool StreamMgr::StartStreaming()
 
 bool StreamMgr::StartRecording()
 {
+	SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
 	obs_data_t* settings = obs_data_create();
 	//obs_data_set_string(settings, "format_name", "mp4");
 	obs_data_set_string(settings, "path", opt.filePath);
